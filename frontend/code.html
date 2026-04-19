@@ -12,10 +12,8 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
     rel="stylesheet" />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
-    rel="stylesheet" />
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script id="tailwind-config">
     tailwind.config = {
       darkMode: "class",
@@ -88,6 +86,7 @@
   <style>
     body {
       font-family: 'Inter', sans-serif;
+      background: radial-gradient(circle at top right, #eef4ff 0%, #f7f9fb 35%, #f7f9fb 100%);
     }
 
     h1,
@@ -104,9 +103,8 @@
       background: linear-gradient(135deg, #001831 0%, #082d50 100%);
     }
 
-    .glass-sidebar {
-      background: rgba(242, 244, 246, 0.8);
-      backdrop-filter: blur(24px);
+    .card-soft {
+      box-shadow: 0 8px 30px rgba(8, 45, 80, 0.06);
     }
   </style>
 </head>
@@ -196,50 +194,42 @@
       </div>
     </header>
     <!-- Page Canvas -->
-    <section class="p-8 space-y-8 max-w-7xl mx-auto w-full">
-      <!-- Header Title Section -->
-      <div class="mb-8">
-        <h1 class="text-3xl font-extrabold text-primary flex items-center gap-3">
+    <section class="p-4 md:p-8 space-y-8 max-w-7xl mx-auto w-full">
+      <div class="flex flex-col gap-2">
+        <h1 class="text-2xl md:text-3xl font-extrabold text-primary flex items-center gap-3">
           <span class="material-symbols-outlined text-3xl" data-icon="local_shipping">local_shipping</span>
           Supply Chain Risk Predictor
         </h1>
-        <p class="text-on-surface-variant mt-1 label-md">Predict delivery disruptions with AI-powered logistics
-          intelligence.</p>
+        <p class="text-on-surface-variant text-sm md:text-base">Predict delivery disruptions with AI-powered logistics intelligence.</p>
       </div>
-      <!-- Bento Grid Layout -->
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        <!-- Prediction Form Card (Left Column) -->
-        <div class="lg:col-span-5 flex flex-col gap-8">
-          <div class="bg-surface-container-lowest rounded-xl p-8 shadow-sm border border-outline-variant/15">
+
+      <div class="grid grid-cols-1 xl:grid-cols-12 gap-6 xl:gap-8 items-start">
+        <div class="xl:col-span-4">
+          <div class="bg-surface-container-lowest rounded-2xl p-6 md:p-8 border border-outline-variant/20 card-soft">
             <div class="flex items-center justify-between mb-6">
               <h2 class="text-xl font-bold text-primary">Calculate Risk</h2>
               <span class="material-symbols-outlined text-on-surface-variant" data-icon="analytics">analytics</span>
             </div>
-            <form class="space-y-6">
+
+            <form class="space-y-5">
               <div class="space-y-2">
-                <label class="label-md text-sm font-semibold text-on-surface-variant block">
-                  DISTANCE (KM)
-                </label>
+                <label class="text-xs font-semibold tracking-wide text-on-surface-variant block">DISTANCE (KM)</label>
                 <input id="distance"
-                  class="w-full bg-surface-container-high border-none rounded-lg py-3 px-4 text-on-surface"
+                  class="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl py-3 px-4 text-on-surface focus:ring-2 focus:ring-primary/30 focus:border-primary"
                   placeholder="Enter distance in kilometers" type="number" />
               </div>
 
               <div class="space-y-2">
-                <label class="label-md text-sm font-semibold text-on-surface-variant block">
-                  ESTIMATED DELAY (HOURS)
-                </label>
+                <label class="text-xs font-semibold tracking-wide text-on-surface-variant block">ESTIMATED DELAY (HOURS)</label>
                 <input id="delay"
-                  class="w-full bg-surface-container-high border-none rounded-lg py-3 px-4 text-on-surface"
+                  class="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl py-3 px-4 text-on-surface focus:ring-2 focus:ring-primary/30 focus:border-primary"
                   placeholder="Hours beyond schedule" type="number" />
               </div>
 
               <div class="space-y-2">
-                <label class="label-md text-sm font-semibold text-on-surface-variant block">
-                  WEATHER CONDITIONS
-                </label>
+                <label class="text-xs font-semibold tracking-wide text-on-surface-variant block">WEATHER CONDITIONS</label>
                 <select id="weather"
-                  class="w-full bg-surface-container-high border-none rounded-lg py-3 px-4 text-on-surface">
+                  class="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl py-3 px-4 text-on-surface focus:ring-2 focus:ring-primary/30 focus:border-primary">
                   <option value="">Select Weather</option>
                   <option value="0">Good</option>
                   <option value="1">Bad</option>
@@ -247,137 +237,56 @@
               </div>
 
               <button onclick="predict()"
-                class="btn-gradient w-full py-4 text-white font-bold rounded-xl shadow-lg hover:opacity-90 active:scale-95 transition-all"
+                class="btn-gradient w-full py-3.5 text-white font-semibold rounded-xl shadow-md hover:opacity-95 hover:shadow-lg active:scale-[0.99] transition-all"
                 type="button">
                 Predict Risk
               </button>
-
             </form>
-            <!-- Prediction Results Area -->
+
             <div id="resultBox"
-              class="hidden mt-8 pt-8 border-t border-outline-variant/10 space-y-4 p-4 rounded-xl text-center font-bold">
-            </div>
-            <!-- Safe State -->
-            <div class="flex items-center justify-between p-4 bg-emerald-50 rounded-xl">
-              <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center">
-                  <span class="material-symbols-outlined text-emerald-600" data-icon="check_circle">check_circle</span>
-                </div>
-                <div>
-                  <p class="font-bold text-emerald-900">Safe ✅</p>
-                  <p class="text-xs text-emerald-700">98.4% Confidence in delivery</p>
-                </div>
-              </div>
-              <span class="text-emerald-700 font-bold">LOW</span>
-            </div>
-            <!-- High Risk State -->
-            <div class="flex items-center justify-between p-4 bg-tertiary-fixed rounded-xl">
-              <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-tertiary-container/10 rounded-full flex items-center justify-center">
-                  <span class="material-symbols-outlined text-on-tertiary-container" data-icon="error">error</span>
-                </div>
-                <div>
-                  <p class="font-bold text-tertiary-container">High Risk 🚨</p>
-                  <p class="text-xs text-on-tertiary-container">Potential disruption detected</p>
-                </div>
-              </div>
-              <span class="text-on-tertiary-container font-bold">CRITICAL</span>
-            </div>
-            <!-- Loading State Example -->
-            <div class="flex items-center justify-center gap-3 p-4 bg-surface-container rounded-xl animate-pulse">
-              <span class="material-symbols-outlined animate-spin" data-icon="sync">sync</span>
-              <span class="font-semibold text-on-surface-variant">Predicting...</span>
-            </div>
-          </div>
-          <!-- Small Insight Card -->
-          <div class="bg-primary text-white rounded-xl p-6 overflow-hidden relative">
-            <div class="relative z-10">
-              <h3 class="text-lg font-bold mb-2">Did you know?</h3>
-              <p class="text-sm text-primary-fixed leading-relaxed">Predictive analytics can reduce logistics
-                operational costs by up to 15% through route optimization.</p>
-            </div>
-            <div class="absolute -right-4 -bottom-4 opacity-10">
-              <span class="material-symbols-outlined text-9xl" data-icon="insights">insights</span>
+              class="hidden mt-6 min-h-[72px] flex items-center justify-center rounded-xl border border-outline-variant/20 px-4 py-4 text-center font-semibold">
             </div>
           </div>
         </div>
-        <!-- History Section Card (Right Column) -->
-        <div class="lg:col-span-7">
-          <div
-            class="bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant/15 h-full flex flex-col">
-            <div class="p-8 flex justify-between items-center">
+
+        <div class="xl:col-span-8 space-y-6">
+          <div class="bg-surface-container-lowest rounded-2xl border border-outline-variant/20 card-soft overflow-hidden">
+            <div class="px-5 md:px-7 py-5 border-b border-outline-variant/15 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <div>
-                <h2 class="text-xl font-bold text-primary">Intelligence Ledger</h2>
+                <h2 class="text-lg md:text-xl font-bold text-primary">Intelligence Ledger</h2>
                 <p class="text-sm text-on-surface-variant">Recent predictive historical data</p>
               </div>
-              <div class="flex gap-2">
-                <button onclick="loadHistory()" class="flex items-center gap-2 px-4 py-2 hover:bg-surface-container rounded-lg text-sm text-on-surface-variant transition-all">
-                  <span class="material-symbols-outlined text-sm" data-icon="refresh">refresh</span>
-                  Refresh
-                </button>
-                <button
-                  class="flex items-center gap-2 px-4 py-2 hover:bg-error-container text-error hover:text-on-error-container rounded-lg text-sm transition-all">
-                  <span class="material-symbols-outlined text-sm" data-icon="delete">delete</span>
-                  Clear History
-                </button>
-              </div>
+              <button onclick="loadHistory()"
+                class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-surface-container-low hover:bg-surface-container text-sm font-medium text-on-surface-variant transition-colors">
+                <span class="material-symbols-outlined text-sm" data-icon="refresh">refresh</span>
+                Refresh
+              </button>
             </div>
-            <!-- Table Area -->
-            <div class="flex-1 overflow-x-auto">
-              <table class="w-full text-left">
-                <thead class="bg-surface-container-low border-none">
+
+            <div class="overflow-x-auto">
+              <table class="w-full text-left min-w-[640px]">
+                <thead class="bg-surface-container-low/70">
                   <tr>
-                    <th class="px-8 py-4 text-xs uppercase tracking-widest text-on-surface-variant font-bold">TIMESTAMP
-                    </th>
-                    <th class="px-8 py-4 text-xs uppercase tracking-widest text-on-surface-variant font-bold">DISTANCE
-                    </th>
-                    <th class="px-8 py-4 text-xs uppercase tracking-widest text-on-surface-variant font-bold">DELAY</th>
-                    <th class="px-8 py-4 text-xs uppercase tracking-widest text-on-surface-variant font-bold">WEATHER
-                    </th>
-                    <th class="px-8 py-4 text-xs uppercase tracking-widest text-on-surface-variant font-bold">RESULT
-                    </th>
+                    <th class="px-5 md:px-7 py-3 text-[11px] uppercase tracking-[0.12em] text-on-surface-variant font-bold">Timestamp</th>
+                    <th class="px-5 md:px-7 py-3 text-[11px] uppercase tracking-[0.12em] text-on-surface-variant font-bold">Distance</th>
+                    <th class="px-5 md:px-7 py-3 text-[11px] uppercase tracking-[0.12em] text-on-surface-variant font-bold">Delay</th>
+                    <th class="px-5 md:px-7 py-3 text-[11px] uppercase tracking-[0.12em] text-on-surface-variant font-bold">Weather</th>
+                    <th class="px-5 md:px-7 py-3 text-[11px] uppercase tracking-[0.12em] text-on-surface-variant font-bold">Result</th>
                   </tr>
                 </thead>
                 <tbody id="historyTable"></tbody>
               </table>
             </div>
-            <!-- Table Footer -->
-            <div
-              class="p-8 bg-surface-container-low/30 border-t border-outline-variant/10 rounded-b-xl flex items-center justify-between">
-              <span class="text-xs text-on-surface-variant">Showing 4 of 284 predictions</span>
-              <div class="flex gap-4">
-                <button class="p-2 hover:bg-surface-container rounded-lg disabled:opacity-50" disabled="">
-                  <span class="material-symbols-outlined" data-icon="chevron_left">chevron_left</span>
-                </button>
-                <button class="p-2 hover:bg-surface-container rounded-lg">
-                  <span class="material-symbols-outlined" data-icon="chevron_right">chevron_right</span>
-                </button>
-              </div>
+          </div>
+
+          <div class="bg-surface-container-lowest rounded-2xl border border-outline-variant/20 card-soft p-5 md:p-7">
+            <div class="mb-4">
+              <h2 class="text-lg md:text-xl font-bold text-primary">Risk Analytics</h2>
+              <p class="text-sm text-on-surface-variant mt-1">Live distribution of safe deliveries vs high-risk shipments.</p>
             </div>
-          </div>
-        </div>
-      </div>
-      <!-- Dashboard Analytics Preview (Asymmetric Layout) -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 pt-4">
-        <div class="bg-surface-container-low p-6 rounded-xl border-l-4 border-primary">
-          <p class="text-sm font-bold text-on-surface-variant uppercase tracking-wider">Prediction Accuracy</p>
-          <div class="mt-4 flex items-end gap-2">
-            <span class="text-4xl font-extrabold text-primary">94.2%</span>
-            <span class="text-emerald-600 text-sm font-bold pb-1">+1.2%</span>
-          </div>
-        </div>
-        <div class="bg-surface-container-low p-6 rounded-xl border-l-4 border-primary/50">
-          <p class="text-sm font-bold text-on-surface-variant uppercase tracking-wider">Risk Alerts Sent</p>
-          <div class="mt-4 flex items-end gap-2">
-            <span class="text-4xl font-extrabold text-primary">12</span>
-            <span class="text-on-surface-variant text-sm font-bold pb-1">Today</span>
-          </div>
-        </div>
-        <div class="bg-surface-container-low p-6 rounded-xl border-l-4 border-primary/20">
-          <p class="text-sm font-bold text-on-surface-variant uppercase tracking-wider">Avg. Delay Reduction</p>
-          <div class="mt-4 flex items-end gap-2">
-            <span class="text-4xl font-extrabold text-primary">3.5h</span>
-            <span class="text-emerald-600 text-sm font-bold pb-1">-18%</span>
+            <div class="mx-auto w-full max-w-xl h-[280px] md:h-[320px] relative">
+              <canvas id="riskChart"></canvas>
+            </div>
           </div>
         </div>
       </div>
@@ -393,7 +302,7 @@
       </div>
     </footer>
   </main>
-  <script src="script.js"></script>
+  <script src="style.js"></script>
 </body>
 
 </html>

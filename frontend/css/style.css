@@ -1,0 +1,38 @@
+body {
+  font-family: "Inter", sans-serif;
+  background: radial-gradient(circle at top right, #eef4ff 0%, #f7f9fb 35%, #f7f9fb 100%);
+}
+
+h1,
+h2,
+h3 {
+  font-family: "Manrope", sans-serif;
+}
+
+.material-symbols-outlined {
+  font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+}
+
+.btn-gradient {
+  background: linear-gradient(135deg, #001831 0%, #082d50 100%);
+}
+
+.card-soft {
+  box-shadow: 0 8px 30px rgba(8, 45, 80, 0.06);
+}
+
+.table-row {
+  border-bottom: 1px solid #f0f2f5;
+  transition: background-color 0.2s ease;
+}
+
+.table-row:hover {
+  background: rgba(241, 245, 249, 0.6);
+}
+
+.empty-state {
+  color: #64748b;
+  font-size: 0.875rem;
+  text-align: center;
+  padding: 2.5rem 1rem;
+}
