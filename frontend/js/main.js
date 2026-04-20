@@ -48,6 +48,7 @@ async function handlePredictSubmit(event) {
   const delay = document.getElementById("delay")?.value;
   const weather = document.getElementById("weather")?.value;
   const resultBox = document.getElementById("resultBox");
+  const riskChart = document.getElementById("riskChart");
 
   if (!resultBox) {
     return;
@@ -99,13 +100,22 @@ async function handlePredictSubmit(event) {
     });
 
     if (predictionResponse.status === "success") {
-      showPredictionResult(resultBox, predictionResponse.prediction);
+      showPredictionResult(
+        resultBox,
+        predictionResponse.prediction,
+        predictionResponse.confidence,
+        predictionResponse.risk_probability
+      );
       await refreshDashboardData();
+
+      if (riskChart) {
+        renderRiskChart([], riskChart, predictionResponse.risk_probability);
+      }
     } else {
       showPredictionError(resultBox, predictionResponse.message || "Prediction failed");
     }
   } catch (error) {
-    showPredictionError(resultBox, "Server error");
+    showPredictionError(resultBox, error?.message || "Server error");
   }
 }
 
