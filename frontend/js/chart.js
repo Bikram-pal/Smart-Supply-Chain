@@ -1,20 +1,29 @@
 let chartInstance = null;
 
-export function renderRiskChart(entries, canvas) {
+export function renderRiskChart(entries, canvas, riskProbability = null) {
   if (!canvas || typeof Chart === "undefined") {
     return;
   }
 
-  let high = 0;
   let safe = 0;
+  let high = 0;
 
-  entries.forEach((item) => {
-    if (String(item.result).includes("High")) {
-      high += 1;
-    } else {
-      safe += 1;
-    }
-  });
+  if (
+    riskProbability &&
+    Number.isFinite(Number(riskProbability.safe)) &&
+    Number.isFinite(Number(riskProbability.high_risk))
+  ) {
+    safe = Number(riskProbability.safe);
+    high = Number(riskProbability.high_risk);
+  } else {
+    entries.forEach((item) => {
+      if (String(item.result).includes("High")) {
+        high += 1;
+      } else {
+        safe += 1;
+      }
+    });
+  }
 
   const ctx = canvas.getContext("2d");
 
@@ -39,6 +48,18 @@ export function renderRiskChart(entries, canvas) {
       maintainAspectRatio: false,
       responsive: true,
       plugins: {
+        tooltip: {
+          callbacks: {
+            label(context) {
+              const value = Number(context.raw) || 0;
+              const label = context.label || "";
+              const hasProbability = Boolean(riskProbability);
+              return hasProbability
+                ? `${label}: ${value.toFixed(1)}%`
+                : `${label}: ${value}`;
+            }
+          }
+        },
         legend: {
           position: "bottom"
         }
