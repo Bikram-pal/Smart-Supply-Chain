@@ -1,4 +1,9 @@
-const BASE_URL = document.querySelector('meta[name="api-base-url"]')?.content?.trim() || 'http://localhost:5000';
+const configuredBaseUrl = document.querySelector('meta[name="api-base-url"]')?.content?.trim();
+const API_BASE_URLS = [
+  configuredBaseUrl,
+  'http://localhost:5000',
+  'http://127.0.0.1:5000'
+].filter((value, index, array) => Boolean(value) && array.indexOf(value) === index);
 
 const state = {
   chart: null,
@@ -65,30 +70,85 @@ async function parseJsonSafely(response, context) {
   return response.json();
 }
 
-async function requestPrediction(payload) {
-  const response = await fetch(`${BASE_URL}/predict`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload)
-  });
+async function fetchWithTimeout(url, options = {}, timeoutMs = 10000) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
-  if (!response.ok) {
-    const data = await parseJsonSafely(response, 'Prediction API');
-    throw new Error(data.message || `Prediction request failed: ${response.status}`);
+  try {
+    return await fetch(url, { ...options, signal: controller.signal });
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+function toConnectionErrorMessage(error) {
+  const rawMessage = String(error?.message || '').toLowerCase();
+  if (rawMessage.includes('failed to fetch') || rawMessage.includes('networkerror') || rawMessage.includes('abort')) {
+    return 'Unable to connect to API. Start backend on port 5000 or check deployed API status.';
+  }
+  return error?.message || 'Server error.';
+}
+
+async function requestPrediction(payload) {
+  let lastError = new Error('Prediction service unavailable');
+
+  for (const baseUrl of API_BASE_URLS) {
+    try {
+      const response = await fetchWithTimeout(`${baseUrl}/predict`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) {
+        let message = `Prediction request failed: ${response.status}`;
+        try {
+          const data = await parseJsonSafely(response, 'Prediction API');
+          message = data.message || message;
+        } catch {
+          // Keep default message if response body is not JSON.
+        }
+
+        if (response.status >= 500 || response.status === 404) {
+          lastError = new Error(message);
+          continue;
+        }
+
+        throw new Error(message);
+      }
+
+      return parseJsonSafely(response, 'Prediction API');
+    } catch (error) {
+      lastError = error;
+    }
   }
 
-  return parseJsonSafely(response, 'Prediction API');
+  throw new Error(toConnectionErrorMessage(lastError));
 }
 
 async function fetchHistoryData() {
-  const response = await fetch(`${BASE_URL}/history`);
+  let lastError = new Error('History service unavailable');
 
-  if (!response.ok) {
-    const data = await parseJsonSafely(response, 'History API');
-    throw new Error(data.message || `History request failed: ${response.status}`);
+  for (const baseUrl of API_BASE_URLS) {
+    try {
+      const response = await fetchWithTimeout(`${baseUrl}/history`, {}, 8000);
+
+      if (!response.ok) {
+        const message = `History request failed: ${response.status}`;
+        if (response.status >= 500 || response.status === 404) {
+          lastError = new Error(message);
+          continue;
+        }
+        throw new Error(message);
+      }
+
+      return parseJsonSafely(response, 'History API');
+    } catch (error) {
+      lastError = error;
+    }
   }
 
-  return parseJsonSafely(response, 'History API');
+  throw new Error(toConnectionErrorMessage(lastError));
 }
 
 function normalizeInputValue(value) {
@@ -416,7 +476,7 @@ async function handlePredictSubmit(event) {
       showError(resultCard, predictionResponse.message || 'Prediction failed.');
     }
   } catch (error) {
-    showError(resultCard, error?.message || 'Server error.');
+    showError(resultCard, toConnectionErrorMessage(error));
   }
 }
 
